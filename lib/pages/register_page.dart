@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously, no_leading_underscores_for_local_identifiers
+
 import 'package:flutter/material.dart';
 import 'package:fooddeliveri/components/my_button.dart';
 import 'package:fooddeliveri/components/my_textfield.dart';
+import 'package:fooddeliveri/services/auth/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   final void Function()? onTap;
@@ -15,10 +18,50 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // text editing controller
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  // register method
+
+  void register() async {
+    // get auth service
+    final _authService = AuthService();
+
+    // check if password match -> create user
+    if (passwordController.text == confirmPasswordController.text) {
+// try creating user
+      try {
+        await _authService.signUpWithEmailPassword(
+          emailController.text,
+          passwordController.text,
+        );
+      }
+// display any errors
+      catch (e) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              e.toString(),
+            ),
+          ),
+        );
+      }
+    }
+
+    // if password don't match -> show error
+    else {
+      showDialog(
+        context: context,
+        builder: (context) => const AlertDialog(
+          title: Text(
+            "Passwords don't match !",
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
           //sign up button
           MyButton(
             text: 'Sign Up',
-            onTap: () {},
+            onTap: () {
+              register();
+            },
           ),
           // already have an account ? Login here
           const SizedBox(

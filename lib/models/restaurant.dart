@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fooddeliveri/models/cart_item.dart';
 import 'package:fooddeliveri/models/food.dart';
+import 'package:intl/intl.dart';
 
 class Restaurant extends ChangeNotifier {
   // list of food menu
@@ -25,7 +26,7 @@ class Restaurant extends ChangeNotifier {
       name: 'Classic Cheeseburger',
       description:
           'A juicy patty with melted cheddar, lettuce, tomato and a hint of onion and pickle.',
-      imagePath: 'lib/images/burgers/beef_burger.png',
+      imagePath: 'lib/images/burgers/aloha_burger.png',
       price: 0.99,
       category: FoodCategory.Burgers,
       availableAddons: [
@@ -38,7 +39,7 @@ class Restaurant extends ChangeNotifier {
       name: 'Classic Cheeseburger',
       description:
           'A juicy patty with melted cheddar, lettuce, tomato and a hint of onion and pickle.',
-      imagePath: 'lib/images/burgers/beef_burger.png',
+      imagePath: 'lib/images/burgers/bbq_burger.png',
       price: 0.99,
       category: FoodCategory.Burgers,
       availableAddons: [
@@ -51,7 +52,7 @@ class Restaurant extends ChangeNotifier {
       name: 'Classic Cheeseburger',
       description:
           'A juicy patty with melted cheddar, lettuce, tomato and a hint of onion and pickle.',
-      imagePath: 'lib/images/burgers/beef_burger.png',
+      imagePath: 'lib/images/burgers/bluemoon_burger.png',
       price: 0.99,
       category: FoodCategory.Burgers,
       availableAddons: [
@@ -65,7 +66,7 @@ class Restaurant extends ChangeNotifier {
       name: 'Classic Cheeseburger',
       description:
           'A juicy patty with melted cheddar, lettuce, tomato and a hint of onion and pickle.',
-      imagePath: 'lib/images/burgers/beef_burger.png',
+      imagePath: 'lib/images/burgers/vege_burger.png',
       price: 0.99,
       category: FoodCategory.Burgers,
       availableAddons: [
@@ -81,16 +82,22 @@ class Restaurant extends ChangeNotifier {
     //drinks
   ];
 
+  // user Cart
+  final List<CartItem> _cart = [];
+
+  // delivery address (which user can change/update)
+  String _deliveryAddress = 'Pandurilo 42';
   /*
     GETTERS
   */
   List<Food> get menu => _menu;
+  List<CartItem> get cart => _cart;
+  String get deliveryAddress => _deliveryAddress;
   /*
     OPERATIONS
 
     */
-  // user Cart
-  final List<CartItem> _cart = [];
+
 // add to the cart
   void addToCart(Food food, List<Addon> selectedAddons) {
     CartItem? cartItem = _cart.firstWhereOrNull((item) {
@@ -99,7 +106,7 @@ class Restaurant extends ChangeNotifier {
       // check if the list of selected addons are the same
 
       bool isSameAddon =
-          ListEquality().equals(item.selectedAddons, selectedAddons);
+          const ListEquality().equals(item.selectedAddons, selectedAddons);
 
       return isSameFood && isSameAddon;
     });
@@ -163,15 +170,58 @@ class Restaurant extends ChangeNotifier {
     notifyListeners();
   }
 
+// update delivery address
+  void updateDeliveryAddress(String newAddress) {
+    _deliveryAddress = newAddress;
+    notifyListeners();
+  }
+
   /*
     HELPERS
+  */
 // generate a receipt
+  String displayCartReceipt() {
+    final receipt = StringBuffer();
+    receipt.writeln("Here's your receipt.");
+    receipt.writeln();
+
+    // format the date to include up to seconds only
+
+    String formattedDate =
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+    receipt.writeln(formattedDate);
+    receipt.writeln();
+    receipt.writeln('------------------');
+
+    for (final cartItem in _cart) {
+      receipt.writeln(
+          '${cartItem.quantity} x ${cartItem.food.name} - ${_formatPrice(cartItem.food.price)}');
+      if (cartItem.selectedAddons.isNotEmpty) {
+        receipt
+            .writeln('    Add-ons: ${_formatAddons(cartItem.selectedAddons)}');
+      }
+      receipt.writeln();
+    }
+    receipt.writeln('------------------');
+    receipt.writeln();
+    receipt.writeln('Total Items: ${getTotalItemCount()}');
+    receipt.writeln('Total Price: ${_formatPrice(getTotalPrice())}');
+    receipt.writeln();
+    receipt.writeln('Delivering to : $deliveryAddress');
+
+    return receipt.toString();
+  }
 
 // foermat double value into money
+  String _formatPrice(double price) {
+    return '\$${price.toStringAsFixed(2)}';
+  }
 
 // format list af addon into a string summary
-
-
-
-  */
+  String _formatAddons(List<Addon> addons) {
+    return addons
+        .map((addon) => '${addon.name} (${_formatPrice(addon.price)})')
+        .join((', '));
+  }
 }

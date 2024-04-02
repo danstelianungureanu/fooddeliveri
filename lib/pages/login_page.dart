@@ -1,7 +1,9 @@
+// ignore_for_file: use_build_context_synchronously, no_leading_underscores_for_local_identifiers, unused_element
+
 import 'package:flutter/material.dart';
 import 'package:fooddeliveri/components/my_button.dart';
 import 'package:fooddeliveri/components/my_textfield.dart';
-import 'package:fooddeliveri/pages/home_page.dart';
+import 'package:fooddeliveri/services/auth/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -16,23 +18,54 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // text editing controller
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   // login method
-  void login() {
-    /*
-  fill out authentication here
+  void login() async {
+    // get instance of auth service
+    final _authService = AuthService();
 
-    */
+    // try sign in
+    try {
+      await _authService.signWithEmailPassword(
+        emailController.text,
+        passwordController.text,
+      );
+    }
+    // display any errors
+    catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            e.toString(),
+          ),
+        ),
+      );
+    }
+
+// forgot password
+
+    void forgotPw() {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          title: const Text(
+            'User tapped forgot password.',
+          ),
+        ),
+      );
+    }
 
     // navigate to home page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomePage(),
-      ),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => const HomePage(),
+    //   ),
+    // );
   }
 
   @override
